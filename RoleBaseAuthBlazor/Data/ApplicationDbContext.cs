@@ -8,6 +8,9 @@ namespace RoleBaseAuthBlazor.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+
+     
         }
+        public DbSet<Practice> Practices { get; set; }
     }
 }

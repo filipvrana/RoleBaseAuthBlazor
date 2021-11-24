@@ -15,8 +15,8 @@
 <body>
     <div class="main">
         <div class="content px-4">
-            <h1 class="text-danger">Error.</h1>
-            <h2 class="text-danger">An error occurred while processing your request.</h2>
+            <h1 class="text-danger">Chyba.</h1>
+            <h2 class="text-danger">Nastal error při zpracování tvého požadavku.</h2>
 
             @if (Model.ShowRequestId)
             {
@@ -25,16 +25,11 @@
                 </p>
             }
 
-            <h3>Development Mode</h3>
+            <h3>Vývojářský mód</h3>
             <p>
-                Swapping to the <strong>Development</strong> environment displays detailed information about the error that occurred.
+                Přepínám do <strong>VÝVOJÁŘSKÉHO</strong> prostředí. Prostředí zobrazí detailní informace o nastálém erroru.s
             </p>
-            <p>
-                <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-                It can result in displaying sensitive information from exceptions to end users.
-                For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-                and restarting the app.
-            </p>
+            
         </div>
     </div>
 </body>
