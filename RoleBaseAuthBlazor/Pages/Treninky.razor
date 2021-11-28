@@ -16,7 +16,7 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudTextField @bind-Value="practice.Date" Label="Date" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+        <MudDatePicker Label="Start Date" @bind-Date="practice.Date" />
         <MudTextField @bind-Value="practice.Length" Label="Length(min)" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
         <MudTextField @bind-Value="practice.Location" Label="Location" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
         <br />
@@ -65,8 +65,8 @@
     private bool Search(Practice practice)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
-        if (practice.Date.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-            || practice.Length.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        if (practice.Date.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)
+            || practice.Length.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)
             || practice.Location.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
             return true;
