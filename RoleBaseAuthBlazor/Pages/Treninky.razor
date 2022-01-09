@@ -2,6 +2,7 @@
 
 <PageTitle>Tréninky</PageTitle>
 
+@using Microsoft.AspNetCore.Mvc.Rendering
 @using RoleBaseAuthBlazor.Data
 
 @inject RoleBaseAuthBlazor.Services.IPracticeService practiceService
@@ -9,20 +10,22 @@
 
 <h1>Tréninky</h1>
 
-<MudCard Elevation="25">
-    <MudCardHeader>
-        <CardHeaderContent>
-            <MudText Typo="Typo.h6">Add / Edit Practices</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudDatePicker Label="Start Date" @bind-Date="practice.Date" />
-        <MudTextField @bind-Value="practice.Length" Label="Length(min)" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
-        <MudTextField @bind-Value="practice.Location" Label="Location" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
-        <br />
-        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Save Practice</MudButton>
-    </MudCardContent>
-</MudCard>
+<AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
+    <MudCard Elevation="25">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Add / Edit Practices</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudDatePicker Label="Start Date" @bind-Date="practice.Date" />
+            <MudTextField @bind-Value="practice.Length" Label="Length(min)" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+            <MudTextField @bind-Value="practice.Location" Label="Location" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+            <br />
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Save Practice</MudButton>
+        </MudCardContent>
+    </MudCard>
+</AuthorizeView>
 <br />
 <MudTable Elevation="25" Items="GetPractices()" Filter="new Func<Practice, bool>(Search)" @bind-customer="practice">
     <ToolBarContent>
@@ -35,21 +38,28 @@
         <MudTh>Date</MudTh>
         <MudTh>Length(min)</MudTh>
         <MudTh>Location</MudTh>
-        <MudTh>Actions</MudTh>
+        <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
+            <MudTh>Actions</MudTh>
+        </AuthorizeView>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Id">@context.Id</MudTd>
         <MudTd DataLabel="Date">@context.Date</MudTd>
         <MudTd DataLabel="Length(min)">@context.Length</MudTd>
         <MudTd DataLabel="Location">@context.Location</MudTd>
-        <MudTd DataLabel="">
-            <MudFab @onclick="@(()=>Edit(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
-            <MudFab @onclick="@(()=>Delete(@context.Id))" Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" IconSize="Size.Small" />
-        </MudTd>
+        <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
+            <MudTd DataLabel="">
+                <MudFab @onclick="@(()=>Edit(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
+                <MudFab @onclick="@(()=>Delete(@context.Id))" Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" IconSize="Size.Small" />
+            </MudTd>
+        </AuthorizeView>
+
     </RowTemplate>
 </MudTable>
 
-@code{
+
+
+@code {
     private string searchString = "";
     private Practice practice = new Practice();
     private List<Practice> practices = new List<Practice>();
@@ -66,7 +76,7 @@
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
         if (practice.Date.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)
-            || practice.Length.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        || practice.Length.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)
             || practice.Location.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
             return true;
@@ -77,7 +87,7 @@
     {
         practiceService.SavePractice(practice);
         practice = new Practice();
-        
+
         GetPractices();
     }
     private void Edit(int id)
@@ -86,11 +96,9 @@
     }
     private void Delete(int id)
     {
-        practiceService.DeletePractice(id);
-        
+        practiceService.DeletePractice(id)
+;
+
         GetPractices();
     }
 }
-
-
-
