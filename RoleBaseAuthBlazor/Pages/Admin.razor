@@ -1,8 +1,267 @@
 ﻿@page "/admin"
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> _UserManager
+@inject RoleManager<IdentityRole> _RoleManager
+@using Microsoft.AspNetCore.Authorization;
+
 
 @attribute [Authorize(Roles = "Admin")]
 <h3>Admin Page</h3>
 
-@code {
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>User Name</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in ColUsers)
+        {
+            <tr>
+                <td>@user.Id.Substring(0, 5) ...</td>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>
+                    <!-- Edit the current forecast -->
+                <button class="btn btn-primary"
+                        @onclick="(() => EditUser(user))">
+                        Edit
+                    </button>
+                </td>
+            </tr>
+        }
 
+        @if (ShowPopup)
+        {
+            <!-- This is the popup to create or edit a user -->
+            <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Edit User</h3>
+                            <!-- Button to close the popup -->
+                        <button type="button" class="close"
+                                @onclick="ClosePopup">
+                                <span aria-hidden="true">X</span>
+                            </button>
+                        </div>
+                        <!-- Edit form for the current user -->
+                    <div class="modal-body">
+                            <!-- Only show Id if not a new user -->
+                            @if (objUser.Id != "")
+                            {
+                                <p>@objUser.Id</p>
+                            }
+                            <!-- Only allow edit if a new user -->
+                            @if (objUser.Id != "")
+                            {
+                                <p>@objUser.UserName</p>
+                            }
+                            else
+                            {
+                                <input class="form-control" type="text"
+                               placeholder="UserName"
+                               @bind="objUser.UserName" />
+                            }
+                            <input class="form-control" type="text"
+                               placeholder="Email"
+                               @bind="objUser.Email" />
+                            <input class="form-control" type="password"
+                               placeholder="Password"
+                               @bind="objUser.PasswordHash" />
+                            <select class="form-control"
+                                @bind="@CurrentUserRole">
+                                @foreach (var option in Options)
+                                {
+                                    <option value="@option">
+                                        @option
+                                    </option>
+                                }
+                            </select>
+                            <br /><br />
+                            <!-- Button to save the user -->
+                        <button class="btn btn-primary"
+                                @onclick="SaveUser">
+                                Save
+                            </button>
+                            <!-- Only show delete button if not a new record -->
+                            @if (objUser.Id != "")
+                            {
+                                <!-- Button to delete the forecast -->
+                                <button class="btn btn-danger"
+                                @onclick="DeleteUser">
+                                    Delete
+                                </button>
+                            }
+                            <br />
+                            <span style="color:red">@strError</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </tbody>
+</table>
+
+@code {
+    // Property used to add or edit the currently selected user
+    IdentityUser objUser = new IdentityUser();
+    // Tracks the selected role for the currently selected user
+    string CurrentUserRole { get; set; } = "Users";
+    // Collection to display the existing users
+    List<IdentityUser> ColUsers = new List<IdentityUser>();
+    // Options to display in the roles dropdown when editing a user
+    List<string> Options = new List<string>() { "Player", "Coach", "Manager" };
+    // To hold any possible errors
+    string strError = "";
+    // To enable showing the Popup
+    bool ShowPopup = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        GetUsers();
+    }
+
+    public void GetUsers()
+    {
+        // clear any error messages
+        strError = "";
+        // Collection to hold users
+        ColUsers = new List<IdentityUser>();
+        // get users from _UserManager
+        var user = _UserManager.Users.Select(x => new IdentityUser
+            {
+                Id = x.Id,
+                UserName = x.UserName,
+                Email = x.Email,
+                PasswordHash = "*****"
+            });
+        foreach (var item in user)
+        {
+            if (item.Email != "admin1@gmail.com")
+                ColUsers.Add(item);
+        }
+    }
+
+    async Task EditUser(IdentityUser _IdentityUser)
+    {
+        // Set the selected user
+        // as the current user
+        objUser = _IdentityUser;
+        // Get the user
+        var user = await _UserManager.FindByIdAsync(objUser.Id);
+
+        if (user != null)
+        {
+            var rolename = await _UserManager.GetRolesAsync(objUser);
+            if (rolename.Count == 0)
+            {
+                var defaultrole = _RoleManager.FindByNameAsync("player").Result;
+                var usr = await _UserManager.FindByIdAsync(objUser.Id.ToString());
+                var result = await _UserManager.AddToRoleAsync(usr, defaultrole.Name);
+            }
+            rolename = await _UserManager.GetRolesAsync(objUser);
+            CurrentUserRole = rolename.First();
+        }
+        // Open the Popup
+        ShowPopup = true;
+    }
+
+    void AddNewUser()
+    {
+    }
+    async Task SaveUser()
+    {
+        try
+        {
+            // Is this an existing user?
+            if (objUser.Id != "")
+            {
+                var user = await _UserManager.FindByIdAsync(objUser.Id);
+
+                if (user != null)
+                {
+                    var rolename = await _UserManager.GetRolesAsync(objUser);
+                    var role = rolename.First();
+                    await _UserManager.UpdateAsync(user);
+                    await _UserManager.RemoveFromRoleAsync(user, role);
+                    var newRole = _RoleManager.FindByNameAsync(CurrentUserRole).Result;
+                    var usr = await _UserManager.FindByIdAsync(objUser.Id.ToString());
+                    var result = await _UserManager.AddToRoleAsync(usr, newRole.Name);
+                }
+            }
+            else
+            {
+                // Insert new user
+                var NewUser =
+                    new IdentityUser
+                        {
+                            UserName = objUser.UserName,
+                            Email = objUser.Email
+                        };
+                var CreateResult =
+                    await _UserManager
+                    .CreateAsync(NewUser, objUser.PasswordHash);
+                if (!CreateResult.Succeeded)
+                {
+                    if (CreateResult
+                        .Errors
+                        .FirstOrDefault() != null)
+                    {
+                        strError =
+                            CreateResult
+                            .Errors
+                            .FirstOrDefault()
+                            .Description;
+                    }
+                    else
+                    {
+                        strError = "Create error";
+                    }
+                    // Keep the popup opened
+                    return;
+                }
+                else
+                {
+                    // Handle Roles
+                    if (CurrentUserRole == "Admin")
+                    {
+                        // Put admin in Administrator role
+                        await _UserManager
+                            .AddToRoleAsync(NewUser, "Admin");
+                    }
+                }
+            }
+            // Close the Popup
+            ShowPopup = false;
+            // Refresh Users
+            GetUsers();
+        }
+        catch (Exception ex)
+        {
+            strError = ex.GetBaseException().Message;
+        }
+    }
+    async Task DeleteUser()
+    {
+        // Close the Popup
+        ShowPopup = false;
+        // Get the user
+        var user = await _UserManager.FindByIdAsync(objUser.Id);
+        if (user != null)
+        {
+            // Delete the user
+            await _UserManager.DeleteAsync(user);
+        }
+        // Refresh Users
+        GetUsers();
+    }
+    void ClosePopup()
+    {
+        // Close the Popup
+        ShowPopup = false;
+    }
 }

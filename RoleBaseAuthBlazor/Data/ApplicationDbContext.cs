@@ -12,5 +12,6 @@ namespace RoleBaseAuthBlazor.Data
      
         }
         public DbSet<Practice> Practices { get; set; }
+        public DbSet<Game> Games { get; set; }
     }
 }

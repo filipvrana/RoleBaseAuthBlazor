@@ -2,7 +2,7 @@
 
 namespace RoleBaseAuthBlazor.Services
 {
-   
+
     public class PracticeService : IPracticeService
     {
         private readonly ApplicationDbContext _dbContext;

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using RoleBaseAuthBlazor.Areas.Identity;
 using RoleBaseAuthBlazor.Data;
+using RoleBaseAuthBlazor.GameServices;
 using RoleBaseAuthBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,11 +17,12 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<IPracticeService, PracticeService>();
+builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 builder.Services.AddMudServices();
