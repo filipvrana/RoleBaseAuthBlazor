@@ -1,8 +1,9 @@
 ﻿@page "/admin"
 @using Microsoft.AspNetCore.Identity
-@inject UserManager<IdentityUser> _UserManager
+@inject UserManager<BlazorUser> _UserManager
 @inject RoleManager<IdentityRole> _RoleManager
 @using Microsoft.AspNetCore.Authorization;
+@using RoleBaseAuthBlazor.Data
 
 
 @attribute [Authorize(Roles = "Admin")]
@@ -107,11 +108,11 @@
 
 @code {
     // Property used to add or edit the currently selected user
-    IdentityUser objUser = new IdentityUser();
+    BlazorUser objUser = new BlazorUser();
     // Tracks the selected role for the currently selected user
     string CurrentUserRole { get; set; } = "Users";
     // Collection to display the existing users
-    List<IdentityUser> ColUsers = new List<IdentityUser>();
+    List<BlazorUser> ColUsers = new List<BlazorUser>();
     // Options to display in the roles dropdown when editing a user
     List<string> Options = new List<string>() { "Player", "Coach", "Manager" };
     // To hold any possible errors
@@ -130,9 +131,9 @@
         // clear any error messages
         strError = "";
         // Collection to hold users
-        ColUsers = new List<IdentityUser>();
+        ColUsers = new List<BlazorUser>();
         // get users from _UserManager
-        var user = _UserManager.Users.Select(x => new IdentityUser
+        var user = _UserManager.Users.Select(x => new BlazorUser
             {
                 Id = x.Id,
                 UserName = x.UserName,
@@ -146,7 +147,7 @@
         }
     }
 
-    async Task EditUser(IdentityUser _IdentityUser)
+    async Task EditUser(BlazorUser _IdentityUser)
     {
         // Set the selected user
         // as the current user
@@ -197,7 +198,7 @@
             {
                 // Insert new user
                 var NewUser =
-                    new IdentityUser
+                    new BlazorUser
                         {
                             UserName = objUser.UserName,
                             Email = objUser.Email

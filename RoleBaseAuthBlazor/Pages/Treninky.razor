@@ -1,10 +1,10 @@
 ﻿@page "/treninky"
+@inject IHttpContextAccessor httpContextAccessor
 
 <PageTitle>Tréninky</PageTitle>
 
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using RoleBaseAuthBlazor.Data
-
 @inject RoleBaseAuthBlazor.Services.IPracticeService practiceService
 
 
@@ -27,7 +27,7 @@
     </MudCard>
 </AuthorizeView>
 <br />
-<MudTable Elevation="25" Items="GetPractices()" Filter="new Func<Practice, bool>(Search)" @bind-customer="practice">
+<MudTable Elevation="25" Items="@practices" Filter="new Func<Practice, bool>(Search)" @bind-customer="practice">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Practices</MudText>
         <MudSpacer />
@@ -53,6 +53,12 @@
                 <MudFab @onclick="@(()=>Delete(@context.Id))" Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" IconSize="Size.Small" />
             </MudTd>
         </AuthorizeView>
+        <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach, Player">
+            <MudTd DataLabel="">
+                <MudFab @onclick="@(()=>Attend(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
+                <span>Alarm is @(AttendBool ? "On" : "Off")</span>
+            </MudTd>
+        </AuthorizeView>
 
     </RowTemplate>
 </MudTable>
@@ -63,13 +69,16 @@
     private string searchString = "";
     private Practice practice = new Practice();
     private List<Practice> practices = new List<Practice>();
+    public string UserName;
+    public bool AttendBool { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        GetPractices();
+        UserName = httpContextAccessor.HttpContext.User.Identity.Name;
+        practices = await GetPractices();
     }
-    private List<Practice> GetPractices()
+    private async Task<List<Practice>> GetPractices()
     {
-        practices = practiceService.GetPractices();
+        practices = await practiceService.GetPractices();
         return practices;
     }
     private bool Search(Practice practice)
@@ -83,22 +92,26 @@
         }
         return false;
     }
-    private void Save()
+    private async Task Save()
     {
         practiceService.SavePractice(practice);
         practice = new Practice();
 
-        GetPractices();
+        practices = await GetPractices();
     }
-    private void Edit(int id)
+    private async Task Edit(int id)
     {
         practice = practices.FirstOrDefault(c => c.Id == id);
     }
-    private void Delete(int id)
+    private async Task Delete(int id)
     {
-        practiceService.DeletePractice(id)
-;
+        practiceService.DeletePractice(id);
+        practices = await GetPractices();
+    }
 
-        GetPractices();
+    private async Task Attend(int id)
+    {
+        await practiceService.AttendPractice(id, UserName);
+        practices = await GetPractices();
     }
 }

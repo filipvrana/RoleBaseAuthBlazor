@@ -1,4 +1,7 @@
-﻿using RoleBaseAuthBlazor.Data;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using RoleBaseAuthBlazor.Data;
 
 namespace RoleBaseAuthBlazor.Services
 {
@@ -6,10 +9,14 @@ namespace RoleBaseAuthBlazor.Services
     public class PracticeService : IPracticeService
     {
         private readonly ApplicationDbContext _dbContext;
-        public PracticeService(ApplicationDbContext context)
+        private readonly UserManager<BlazorUser> _userManager;
+
+        public PracticeService(ApplicationDbContext context, UserManager<BlazorUser> userManager)
         {
             _dbContext = context;
+            _userManager = userManager;
         }
+
         public void DeletePractice(int id)
         {
             var practice = _dbContext.Practices.FirstOrDefault(x => x.Id == id);
@@ -20,15 +27,39 @@ namespace RoleBaseAuthBlazor.Services
             }
         }
 
-        public Practice GetPracticeById(int id)
+        public async Task AttendPractice(int id, string email)
         {
-            var practice = _dbContext.Practices.SingleOrDefault(x => x.Id == id);
+            var usr = await _userManager.FindByEmailAsync(email);
+            var practice = await _dbContext.Practices.SingleOrDefaultAsync(x => x.Id == id);
+            if (practice == null)
+                return;
+
+            if (practice.BlazorUsers == null)
+            {
+                practice.BlazorUsers = new List<BlazorUser>();
+            }
+            if (practice.BlazorUsers.Contains(usr))
+            {
+                practice.BlazorUsers.Remove(usr);
+            }
+            else
+            {
+                practice.BlazorUsers.Add(usr);
+            }
+
+            _dbContext.Practices.Update(practice);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<Practice> GetPracticeById(int id)
+        {
+            var practice = await _dbContext.Practices.SingleOrDefaultAsync(x => x.Id == id);
             return practice;
         }
 
-        public List<Practice> GetPractices()
+        public Task<List<Practice>> GetPractices()
         {
-            return _dbContext.Practices.ToList();
+            return _dbContext.Practices.ToListAsync();
         }
 
         public void SavePractice(Practice practice)

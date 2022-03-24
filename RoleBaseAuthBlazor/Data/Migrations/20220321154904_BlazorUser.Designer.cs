@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RoleBaseAuthBlazor.Data;
 
@@ -11,9 +12,10 @@ using RoleBaseAuthBlazor.Data;
 namespace RoleBaseAuthBlazor.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220321154904_BlazorUser")]
+    partial class BlazorUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -273,25 +275,6 @@ namespace RoleBaseAuthBlazor.Data.Migrations
                     b.ToTable("Games");
                 });
 
-            modelBuilder.Entity("RoleBaseAuthBlazor.Data.Moneyy", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("BlazorUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BlazorUserId");
-
-                    b.ToTable("Money");
-                });
-
             modelBuilder.Entity("RoleBaseAuthBlazor.Data.Practice", b =>
                 {
                     b.Property<int>("Id")
@@ -318,11 +301,6 @@ namespace RoleBaseAuthBlazor.Data.Migrations
             modelBuilder.Entity("RoleBaseAuthBlazor.Data.BlazorUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<int?>("MoneyyId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("MoneyyId");
 
                     b.HasDiscriminator().HasValue("BlazorUser");
                 });
@@ -391,29 +369,6 @@ namespace RoleBaseAuthBlazor.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("RoleBaseAuthBlazor.Data.Moneyy", b =>
-                {
-                    b.HasOne("RoleBaseAuthBlazor.Data.BlazorUser", "BlazorUser")
-                        .WithMany()
-                        .HasForeignKey("BlazorUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BlazorUser");
-                });
-
-            modelBuilder.Entity("RoleBaseAuthBlazor.Data.BlazorUser", b =>
-                {
-                    b.HasOne("RoleBaseAuthBlazor.Data.Moneyy", null)
-                        .WithMany("BlazorUsers")
-                        .HasForeignKey("MoneyyId");
-                });
-
-            modelBuilder.Entity("RoleBaseAuthBlazor.Data.Moneyy", b =>
-                {
-                    b.Navigation("BlazorUsers");
                 });
 #pragma warning restore 612, 618
         }

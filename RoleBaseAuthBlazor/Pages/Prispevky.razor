@@ -1,7 +1,112 @@
 ﻿@page "/prispevky"
+@inject IHttpContextAccessor httpContextAccessor
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using RoleBaseAuthBlazor.Data
+@inject RoleBaseAuthBlazor.MoneyServices.IMoneyService moneyService
 
 <PageTitle>Příspěvky</PageTitle>
-
 <h1>Příspěvky</h1>
 
+<AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
+    <MudCard Elevation="25">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Add / Edit Money</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudDatePicker Label="Start Date" @bind-Date="Moneyy.Date" />
+            <MudTextField @bind-Value="Moneyy.Amount" Label="Amount" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+            <br />
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Save Money</MudButton>
+        </MudCardContent>
+    </MudCard>
+</AuthorizeView>
+<br />
+<MudTable Elevation="25" Items="@moneyy" Filter="new Func<Moneyy, bool>(Search)" @bind-customer="money">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Money</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search for Money..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>ID</MudTh>
+        <MudTh>User</MudTh>
+        <MudTh>Date</MudTh>
+        <MudTh>Amount</MudTh>
+        <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
+            <MudTh>Actions</MudTh>
+        </AuthorizeView>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">@context.Id</MudTd>
+        <MudTd DataLabel="User">@context.BlazorUser</MudTd>
+        <MudTd DataLabel="Date">@Moneyy.Date</MudTd>
+        <MudTd DataLabel="Amount">@Moneyy.Amount</MudTd>
+        <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
+            <MudTd DataLabel="">
+                <MudFab @onclick="@(()=>Edit(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
+                <MudFab @onclick="@(()=>Delete(@context.Id))" Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" IconSize="Size.Small" />
+            </MudTd>
+        </AuthorizeView>
+        <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach, Player">
+            <MudTd DataLabel="">
+                <MudFab @onclick="@(()=>Attend(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
+                <span>Alarm is @(AttendBool ? "On" : "Off")</span>
+            </MudTd>
+        </AuthorizeView>
 
+    </RowTemplate>
+</MudTable>
+
+
+
+@code {
+    private string searchString = "";
+    private Moneyy money = new Moneyy();
+    private List<Moneyy> moneyy = new List<Moneyy>();
+    public string UserName;
+    public bool AttendBool { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        UserName = httpContextAccessor.HttpContext.User.Identity.Name;
+        moneyy = await GetMoney();
+    }
+    private async Task<List<Moneyy>> GetMoney()
+    {
+        moneyy = await moneyService.GetMoney();
+        return moneyy;
+    }
+    private bool Search(Moneyy money)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (@Moneyy.Date.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        || @Moneyy.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+    private async Task Save()
+    {
+        moneyService.SaveMoney(money);
+        money = new Moneyy();
+
+        moneyy = await GetMoney();
+    }
+    private async Task Edit(int id)
+    {
+        money = moneyy.FirstOrDefault(c => c.Id == id);
+    }
+    private async Task Delete(int id)
+    {
+        moneyService.DeleteMoney(id);
+        moneyy = await GetMoney();
+    }
+
+    private async Task Attend(int id)
+    {
+        await moneyService.AttendMoney(id, UserName);
+        moneyy = await GetMoney();
+    }
+}
