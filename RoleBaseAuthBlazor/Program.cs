@@ -5,6 +5,7 @@ using MudBlazor.Services;
 using RoleBaseAuthBlazor.Areas.Identity;
 using RoleBaseAuthBlazor.Data;
 using RoleBaseAuthBlazor.GameServices;
+using RoleBaseAuthBlazor.MoneyServices;
 using RoleBaseAuthBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddDefaultIdentity<BlazorUser>(options => options.SignIn.Requir
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<IPracticeService, PracticeService>();
+builder.Services.AddScoped<IMoneyService, MoneyService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<BlazorUser>>();

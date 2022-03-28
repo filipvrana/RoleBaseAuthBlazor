@@ -1,0 +1,61 @@
+﻿@page "/napoveda"
+@inject IHttpContextAccessor httpContextAccessor
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using RoleBaseAuthBlazor.Data
+
+<h1>Nápověda</h1>
+<br />
+
+<h2>Registrace</h2>
+<p>1. V pravém horním rohu klikněte na kolonku <b>Zaregistrovat se</b></p>
+<p>2. Zadejte svůj <b>email, heslo a potvrzující (stejné) heslo</b>, které budete používat při přihlašování na stránku</p>
+<p>3. Klikněte na tlačítko <b>Registrovat se</b></p>
+
+<h2>Přihlášení</h2>
+<p>1. V pravém horním rohu klikněte na kolonku <b>Přihlásit se</b></p>
+<p>2. Zadejte svůj <b>email a heslo</b>, které jste použili při registraci na stránku</p>
+<p>3. Klikněte na tlačítko <b>Přihlásit se</b></p>
+
+<h2>Placení příspěvků</h2>
+<p>1. V hlavním menu klikněte na kolonku <b>Příspěvky</b></p>
+<p>2. <b>Vyberte příspěvek</b>, který jste zaplatili</p>
+<p>3. <b>Klikněte na tlačítko</b> u vybraného příspěvku a potvrďte jeho zaplacení</p>
+<p>4. <b>Správci stránky vaši aktivitu uvídí</b></p>
+
+<h2>Účast na trénincích</h2>
+<p>1. V hlavním menu klikněte na kolonku <b>Tréninky</b></p>
+<p>2. <b>Vyberte trénink</b>, kterého se zúčastníte</p>
+<p>3. <b>Klikněte na tlačítko</b> u vybraného tréninku a potvrďte vaši účast</p>
+<p>4. <b>Správci stránky vaši aktivitu uvídí</b></p>
+
+<AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
+    <h2>Vytvoření události pro platbu příspěvků</h2>
+    <p>1. V hlavním menu klikněte na kolonku <b>Příspěvky</b></p>
+    <p>2. V horní tabulce <b>vyplňte kolonky pro datum a částku příspěvku</b></p>
+    <p>3. <b>Klikněte na tlačítko Save</b></p>
+    <p>4. <b>V dolní tabulce uvidíte vytvořenou událost pro příspěvky</b>, kde také můžete sledovat placení hráčů</p>
+    <p>5. Pro úpravu příspěvku myší najeďte na daný příspěvek a <b>klikněte na tlačítko Edit</b></p>
+    <p>6. Pro smazání příspěvku myší najeďte na daný příspěvek a <b>klikněte na tlačítko Delete</b></p>
+
+    <h2>Vytvoření tréninků</h2>
+    <p>1. V hlavním menu klikněte na kolonku <b>Trénink</b></p>
+    <p>2. V horní tabulce <b>vyplňte kolonky pro datum, délku tréninku a místo</b></p>
+    <p>3. <b>Klikněte na tlačítko Save</b></p>
+    <p>4. <b>V dolní tabulce uvidíte vytvořený zápas</b>, kde také můžete sledovat účast hráčů</p>
+    <p>5. Pro úpravu zápasu myší najeďte na daný zápas a <b>klikněte na tlačítko Edit</b></p>
+    <p>6. Pro smazání zápasu myší najeďte na daný zápas a <b>klikněte na tlačítko Delete</b></p>
+
+    <h2>Vytvoření výsledků zápasů</h2>
+    <p>1. V hlavním menu klikněte na kolonku <b>Hlavní stránka</b></p>
+    <p>2. V horní tabulce <b>vyplňte kolonky pro datum, skóre, stav hry a soupeře</b></p>
+    <p>3. <b>Klikněte na tlačítko Save</b></p>
+    <p>4. <b>V dolní tabulce uvidíte vytvořený zápas</b>, kde také můžete sledovat účast hráčů</p>
+    <p>5. Pro úpravu zápasu myší najeďte na daný zápas a <b>klikněte na tlačítko Edit</b></p>
+    <p>6. Pro smazání zápasu myší najeďte na daný zápas a <b>klikněte na tlačítko Delete</b></p>
+    <br />
+</AuthorizeView>
+
+
+@code {
+
+}

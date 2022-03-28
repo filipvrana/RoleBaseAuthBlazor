@@ -32,7 +32,16 @@ namespace RoleBaseAuthBlazor.Data
                 .WithMany(c => c.BlazorUsers)
                 .UsingEntity(au => au.ToTable("BlazorUserPractice"));
 
-            
+            modelBuilder.Entity<Moneyy>()
+                .HasMany(ub => ub.BlazorUsers)
+                .WithMany(au => au.Money)
+                .UsingEntity(au => au.ToTable("BlazorUserMoney"));
+
+
+            modelBuilder.Entity<BlazorUser>()
+                .HasMany(ub => ub.Money)
+                .WithMany(c => c.BlazorUsers)
+                .UsingEntity(au => au.ToTable("BlazorUserMoney"));
 
 
 
