@@ -15,8 +15,8 @@
             </CardHeaderContent>
         </MudCardHeader>
         <MudCardContent>
-            <MudDatePicker Label="Start Date" @bind-Date="Moneyy.Date" />
-            <MudTextField @bind-Value="Moneyy.Amount" Label="Amount" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+            <MudDatePicker Label="Start Date" @bind-Date="money.Date" />
+            <MudTextField @bind-Value="money.Amount" Label="Amount" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
             <br />
             <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Save Money</MudButton>
         </MudCardContent>
@@ -31,7 +31,6 @@
     </ToolBarContent>
     <HeaderContent>
         <MudTh>ID</MudTh>
-        <MudTh>User</MudTh>
         <MudTh>Date</MudTh>
         <MudTh>Amount</MudTh>
         <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
@@ -40,8 +39,8 @@
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Id">@context.Id</MudTd>
-        <MudTd DataLabel="Date">@Moneyy.Date</MudTd>
-        <MudTd DataLabel="Amount">@Moneyy.Amount</MudTd>
+        <MudTd DataLabel="Date">@context.Date</MudTd>
+        <MudTd DataLabel="Amount">@context.Amount</MudTd>
         <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
             <MudTd DataLabel="">
                 <MudFab @onclick="@(()=>Edit(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
@@ -79,8 +78,8 @@
     private bool Search(Moneyy money)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
-        if (@Moneyy.Date.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)
-        || @Moneyy.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (@money.Date.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        || @money.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }

@@ -1,0 +1,14 @@
+﻿@page "/practiceattendance"
+@inject IHttpContextAccessor httpContextAccessor
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using RoleBaseAuthBlazor.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization;
+@inject UserManager<BlazorUser> _UserManager
+@inject RoleManager<IdentityRole> _RoleManager
+@inject RoleManager<PracticeAttendance> _PracticeManager
+@inject RoleBaseAuthBlazor.Services.IPracticeService practiceService
+<PageTitle>Tréninková účast</PageTitle>
+
+<h1>Tréninková účast</h1>
+

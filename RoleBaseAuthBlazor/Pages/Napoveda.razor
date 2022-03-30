@@ -15,7 +15,7 @@
 <p>1. V pravém horním rohu klikněte na kolonku <b>Přihlásit se</b></p>
 <p>2. Zadejte svůj <b>email a heslo</b>, které jste použili při registraci na stránku</p>
 <p>3. Klikněte na tlačítko <b>Přihlásit se</b></p>
-
+<AuthorizeView Context="Auth" Roles="Admin, Manager, Coach, Player">
 <h2>Placení příspěvků</h2>
 <p>1. V hlavním menu klikněte na kolonku <b>Příspěvky</b></p>
 <p>2. <b>Vyberte příspěvek</b>, který jste zaplatili</p>
@@ -27,6 +27,7 @@
 <p>2. <b>Vyberte trénink</b>, kterého se zúčastníte</p>
 <p>3. <b>Klikněte na tlačítko</b> u vybraného tréninku a potvrďte vaši účast</p>
 <p>4. <b>Správci stránky vaši aktivitu uvídí</b></p>
+</AuthorizeView>
 
 <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
     <h2>Vytvoření události pro platbu příspěvků</h2>

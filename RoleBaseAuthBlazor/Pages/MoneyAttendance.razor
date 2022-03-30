@@ -1,0 +1,106 @@
+﻿@page "/moneyattendance"
+@inject IHttpContextAccessor httpContextAccessor
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using RoleBaseAuthBlazor.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization;
+@inject UserManager<BlazorUser> _UserManager
+@inject RoleManager<IdentityRole> _RoleManager
+@inject RoleBaseAuthBlazor.MoneyServices.IMoneyService moneyService
+<PageTitle>Plátci příspěvků</PageTitle>
+
+<h1>Plátci příspěvků</h1>
+
+<MudTable Elevation="25" Items="@moneyy" Filter="new Func<Moneyy, bool>(Search)" @bind-customer="money">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Money</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search for Money Attendance..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>User ID</MudTh>
+        <MudTh>User name</MudTh>
+        <MudTh>Email</MudTh>
+        <MudTh>Money ID</MudTh>
+        <MudTh>Amount</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        @foreach (var user in ColUsers)
+        {
+
+            <MudTd DataLabel="User ID">@user.Id.Substring(0, 5) ...</MudTd>
+            <MudTd DataLabel="User Name">@user.UserName</MudTd>
+            <MudTd DataLabel="Email">@user.Email</MudTd>
+            <MudTd DataLabel="Money ID">@money.Id</MudTd>
+            <MudTd DataLabel="Amount">@money.Amount</MudTd>
+
+        }     
+    </RowTemplate>
+</MudTable>
+
+
+
+@code {
+    private string searchString = "";
+    private Moneyy money = new Moneyy();
+    private List<Moneyy> moneyy = new List<Moneyy>();
+    public string UserName;
+    public bool AttendBool { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        UserName = httpContextAccessor.HttpContext.User.Identity.Name;
+        moneyy = await GetMoney();
+    }
+    private async Task<List<Moneyy>> GetMoney()
+    {
+        moneyy = await moneyService.GetMoney();
+        return moneyy;
+    }
+    private bool Search(Moneyy money)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (@money.Date.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        || @money.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+    private async Task Save()
+    {
+        moneyService.SaveMoney(money);
+        money = new Moneyy();
+
+        moneyy = await GetMoney();
+    }
+    private async Task Edit(int id)
+    {
+        money = moneyy.FirstOrDefault(c => c.Id == id);
+    }
+    private async Task Delete(int id)
+    {
+        moneyService.DeleteMoney(id);
+        moneyy = await GetMoney();
+    }
+
+    private async Task Attend(int id)
+    {
+        await moneyService.AttendMoney(id, UserName);
+        moneyy = await GetMoney();
+    }
+
+    // Property used to add or edit the currently selected user
+    BlazorUser objUser = new BlazorUser();
+    // Tracks the selected role for the currently selected user
+    string CurrentUserRole { get; set; } = "Users";
+    // Collection to display the existing users
+    List<BlazorUser> ColUsers = new List<BlazorUser>();
+    // Options to display in the roles dropdown when editing a user
+    List<string> Options = new List<string>() { "Player", "Coach", "Manager" };
+    // To hold any possible errors
+    string strError = "";
+    // To enable showing the Popup
+    bool ShowPopup = false;
+
+
+}
