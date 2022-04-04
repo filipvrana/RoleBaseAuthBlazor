@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using RoleBaseAuthBlazor.Data
 @inject RoleBaseAuthBlazor.Services.IPracticeService practiceService
+@inject IDialogService DialogService
 
 
 <h1>Tréninky</h1>
@@ -27,7 +28,7 @@
     </MudCard>
 </AuthorizeView>
 <br />
-<MudTable Elevation="25" Items="@practices" Filter="new Func<Practice, bool>(Search)" @bind-customer="practice">
+<MudTable Elevation="25" Items="@practices" Filter="new Func<PracticeDto, bool>(Search)" @bind-customer="practice">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Practices</MudText>
         <MudSpacer />
@@ -38,6 +39,7 @@
         <MudTh>Date</MudTh>
         <MudTh>Length(min)</MudTh>
         <MudTh>Location</MudTh>
+        <MudTh>Attendance</MudTh>
         <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
             <MudTh>Actions</MudTh>
         </AuthorizeView>
@@ -47,6 +49,9 @@
         <MudTd DataLabel="Date">@context.Date</MudTd>
         <MudTd DataLabel="Length(min)">@context.Length</MudTd>
         <MudTd DataLabel="Location">@context.Location</MudTd>
+        <MudButton @onclick="@(() => OpenModal(@context.Id))" Variant="Variant.Filled" Color="Color.Primary">
+            Open Dialog
+        </MudButton>
         <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach">
             <MudTd DataLabel="">
                 <MudFab @onclick="@(()=>Edit(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
@@ -55,8 +60,15 @@
         </AuthorizeView>
         <AuthorizeView Context="Auth" Roles="Admin, Manager, Coach, Player">
             <MudTd DataLabel="">
-                <MudFab @onclick="@(()=>Attend(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
-                <span>Alarm is @(AttendBool ? "On" : "Off")</span>
+                @if (context.Attend)
+                {
+                    <MudFab @onclick="@(() => Attend(@context.Id))" Color="Color.Error" Icon="@Icons.Material.Filled.Remove" Size="Size.Small" IconSize="Size.Small" />
+                }
+                else
+                {
+                    <MudFab @onclick="@(() => Attend(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Add" Size="Size.Small" IconSize="Size.Small" />
+                }
+                <span>Stav: @(context.Attend ? "Zúčastním se" : "Nezúčastním se")</span>
             </MudTd>
         </AuthorizeView>
 
@@ -64,24 +76,62 @@
 </MudTable>
 
 
+@if (ShowPopup)
+{
+    <!-- This is the popup to create or edit a user -->
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Účastníci tréninku</h3>
+                    <!-- Button to close the popup -->
+                <button type="button" class="close"
+                        @onclick="ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <!-- Edit form for the current user -->
+            <div class="modal-body">
+                    @if (practice.BlazorUsers == null)
+                    {
+
+                    }
+                    else
+                    {
+                        @foreach (var user in practice.BlazorUsers)
+                        {
+                            <tr>
+                                <td>@user.Id.Substring(0, 5)..., </td>
+                                <td>@user.UserName, </td>
+                                <td>@user.Email</td>
+                            </tr>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 
 @code {
     private string searchString = "";
-    private Practice practice = new Practice();
-    private List<Practice> practices = new List<Practice>();
+    private PracticeDto practice = new PracticeDto();
+    private List<PracticeDto> practices = new List<PracticeDto>();
     public string UserName;
+    bool ShowPopup = false;
     public bool AttendBool { get; set; }
     protected override async Task OnInitializedAsync()
     {
         UserName = httpContextAccessor.HttpContext.User.Identity.Name;
         practices = await GetPractices();
     }
-    private async Task<List<Practice>> GetPractices()
+    private async Task<List<PracticeDto>> GetPractices()
     {
-        practices = await practiceService.GetPractices();
+        practices = await practiceService.GetPractices(UserName);
         return practices;
     }
-    private bool Search(Practice practice)
+    private bool Search(PracticeDto practice)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
         if (practice.Date.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)
@@ -94,11 +144,11 @@
     }
     private async Task Save()
     {
-        practiceService.SavePractice(practice);
-        practice = new Practice();
-
-        practices = await GetPractices();
+        await practiceService.SavePractice(practice);
+        practice = new PracticeDto();
+        practices = await practiceService.GetPractices(UserName);
     }
+
     private async Task Edit(int id)
     {
         practice = practices.FirstOrDefault(c => c.Id == id);
@@ -114,4 +164,19 @@
         await practiceService.AttendPractice(id, UserName);
         practices = await GetPractices();
     }
+
+    void ClosePopup()
+    {
+        // Close the Popup
+        ShowPopup = false;
+    }
+
+    private async Task OpenModal(int id)
+    {
+        // Close the Popup
+        practice = await practiceService.GetPracticeById(id);
+        ShowPopup = true;
+
+    }
 }
+

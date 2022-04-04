@@ -19,9 +19,9 @@ builder.Services.AddDefaultIdentity<BlazorUser>(options => options.SignIn.Requir
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
-builder.Services.AddScoped<IPracticeService, PracticeService>();
-builder.Services.AddScoped<IMoneyService, MoneyService>();
-builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddTransient<IPracticeService, PracticeService>();
+builder.Services.AddTransient<IMoneyService, MoneyService>();
+builder.Services.AddTransient<IGameService, GameService>();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<BlazorUser>>();
 builder.Services.AddMudServices();
